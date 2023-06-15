@@ -29,11 +29,11 @@ let bulletWidth = 10;
 let bulletHeight = 14;
 let botWidth = 16;
 let botHeight = 16;
-let missileWidth = 20;
-let missileHeight = 40;
+let missileWidth = 15;
+let missileHeight = 60;
 let homeWidth = 140;
 let homeHeight = 70;
-let health = 100;
+let health = 200;
 let bossHealth = 2000;
 let score = 0;
 let homeCount = 0;
@@ -97,13 +97,13 @@ function drawHealthBar(){
     c.fillStyle = "white";
     c.fillRect(canvas.width*0.1, canvas.height*0.02, 200, 20);
     c.fillStyle = "green";
-    c.fillRect(canvas.width*0.1, canvas.height*0.02, health*2, 20);
+    c.fillRect(canvas.width*0.1, canvas.height*0.02, health, 20);
     c.fillStyle = "black";
     c.font = "20px Courier New";
     if (health < 0){
         health = 0;
     }
-    c.fillText(`Home: ${health} %`, canvas.width*0.1 + 40, canvas.height*0.02 + 16);
+    c.fillText(`Home: ${health/2} %`, canvas.width*0.1 + 40, canvas.height*0.02 + 16);
 }
 
 function drawBossHealth(){
@@ -258,10 +258,18 @@ function Bot(){
     this.damage = 1;
     this.width = botWidth;
     this.height = botHeight;
+    this.newAngle = 0;
+    this.missile = false;
 
     this.draw = function(){
+        c.translate(this.x + botWidth/2, this.y + botHeight/2);
+        c.rotate((this.newAngle));
+        c.translate(- this.x - botWidth/2, - this.y - botHeight/2);
         c.fillStyle = this.color;
         c.fillRect(this.x, this.y, this.width, this.height);
+        c.translate(this.x + botWidth/2, this.y + botHeight/2);
+        c.rotate(-(this.newAngle));
+        c.translate(- this.x - botWidth/2, - this.y - botHeight/2);
     }
 
     this.update = function(){
@@ -273,7 +281,7 @@ function Bot(){
 
 function ShootingBot(p, q){
     this.x = canvas.width*p + Math.floor(Math.random()*canvas.width*(q - p));
-    this. y = canvas.height*0.1;
+    this. y = canvas.height*0.1 + Math.floor(Math.random()*canvas.height*0.35);
     this.time = 1;
     this.currentAngle = 0;
     this.newAngle = 0;
@@ -315,7 +323,7 @@ function BossBot(){
         c.fillStyle = "grey";
         c.fillRect(this.x + 25, this.y + 60, 10, 24);
         c.translate(this.x + 30, this.y + 54);
-        c.rotate((this.newAngle));
+        c.rotate(-(this.newAngle));
         c.translate(- this.x - 30, - this.y - 54);
         //this.currentAngle = this.newAngle;
         //this.newAngle = 0;
@@ -327,10 +335,10 @@ function BossBot(){
 function PowerUp(){
     this.r = 20;
     this.x = Math.floor(Math.random()*canvas.width);
-    this.y = canvas.height*0.15 + Math.round(Math.random()*canvas.height*0.38);
+    this.y = canvas.height*0.15 + Math.round(Math.random()*canvas.height*0.35);
     this.power = 0;
     this.time = 0;
-    this.color = 'orange';
+    this.color = "orange";
     this.hit = false;
 
     this.draw = function(){
@@ -395,11 +403,10 @@ function updateBullets(bullets){
     }
 }
 function updateHome(){
-    //console.log(homeCount);
     if (homeCount % 20 == 0){
         for (var i = 0; i < bots.length; i++){
             if ((((bots[i].x - home.x - homeWidth/2)**2+(bots[i].y - home.y)**2)**0.5) < 150 && bots[i].y < home.y - 20){
-                console.log('hello');
+               
                 var dX = bots[i].x - home.x - homeWidth/2;
                 var dY = bots[i].y - home.y;
                 var distance = ((bots[i].x - home.x - homeWidth/2)**2+(bots[i].y - home.y)**2)**0.5;
@@ -408,7 +415,7 @@ function updateHome(){
                 var velocityY = -bulletSpeed*dY/distance;
                 var bullet = new Bullet(velocityX, velocityY);
                 bullet.x = home.x + homeWidth/2 - bulletWidth/2
-                bullet.y = home.y + 24;
+                bullet.y = home.y - 24 - bulletHeight;
                 bullet.spacePressed = true;
                 bullets.push(bullet);
                 //if (dX < 0){
@@ -418,7 +425,6 @@ function updateHome(){
                 //    home.newAngle =  Math.PI/2 + angle;
                 //}
                 //home.newAngle = Math.atan(dY / dX);
-                console.log(home.newAngle);
             }
         }
     }
@@ -437,11 +443,14 @@ function updateBots(){
     }
     for (var i = 0; i < bots.length; i++){
         if (bots[i].homing == true){
-            var dX = player.x - bots[i].x;
-            var dY = player.y - bots[i].y;
+            var dX = player.x + 15 - bots[i].x;
+            var dY = player.y - 20 - bots[i].y;
             var distance = (dX**2+dY**2)**0.5;
             bots[i].velocityX = bots[i].speed*dX/distance;
             bots[i].velocityY = bots[i].speed*dY/distance;
+            //if (bots[i].missile == true){
+            //    bots[i].newAngle = Math.atan(dX / -dY);
+            //}
             if (bots[i].y >= player.y - bots[i].height){
                 bots[i].velocityX = 0;
                 bots[i].velocityY = 3;
@@ -517,13 +526,15 @@ function updateBossBot(bossBot){
     }
     if (bossBot.time % 100 == 0 && bossBot.dead == false){
         if (bossBotCount % 3 == 0){
-            //var dX = bossBot.x + 30 - player.x;
+            //var dX = bossBot.x + 30 - player.x - 15;
             //var dY = bossBot.y + 60 + 24 - player.y;
             //var distance = (dX**2+dY**2)**0.5;
+            //var angle = Math.atan(dX / dY);
             var bot = new Bot();
             bot.x = bossBot.x + 30 - bulletWidth/2
             bot.y = bossBot.y + 84;
             bot.damage = 2;
+            //bot.newAngle = angle;
             //bot.velocityX = -pinkBotSpeed*dX/distance;
             //bot.velocityY = -pinkBotSpeed*dY/distance;
             //bot.color = "pink";
@@ -534,14 +545,17 @@ function updateBossBot(bossBot){
             //for (var i = 0; i < 2; i++){
                 var dX = bossBot.x + 30 - player.x;
                 var dY = bossBot.y + 60 + 24 - player.y;
+                var angle = Math.atan(-dX / dY);
                 var bot = new Bot();
                 bot.x = bossBot.x + 30;
                 bot.y = bossBot.y + 84;
                 bot.homing = true;
                 bot.color = "cyan";
+                bot.missile = true;
                 bot.speed = missileSpeed;
                 bot.width = missileWidth;
                 bot.height = missileHeight;
+                //bot.newAngle = angle;
                 bot.damage = 4;
                 bots.push(bot);
                 bossBot.newAngle = - Math.atan(dX/dY);
@@ -552,7 +566,6 @@ function updateBossBot(bossBot){
 }
 
 function updateShootingBots(shootingBots){
-    //console.log(shootingBots.length);
     if (shootingBots.length == 0){
         var shootingBot = new ShootingBot(0, 0.4);
         shootingBots.push(shootingBot); 
@@ -586,6 +599,7 @@ function updateShootingBots(shootingBots){
                 bullets.splice(j, 1);
                 hitSound.play();
                 score += 30;
+                break;
             }
         }
     }
@@ -595,8 +609,7 @@ function updateShootingBots(shootingBots){
 }
 
 function updatePowerUps(powerUps){
-    console.log(powerUpCount)
-    if (powerUpCount % 600 == 0 && powerUps.length < 1){
+    if (powerUpCount % 300 == 0 && powerUps.length < 1){
         for (var i = 0; i < 1; i++){
             var powerUp = new PowerUp();
             powerUps.push(powerUp);
@@ -604,6 +617,7 @@ function updatePowerUps(powerUps){
     }
     for (var i = 0; i < powerUps.length; i++){
         powerUps[i].draw();
+        
         for (var j = 0; j < bullets.length; j++){
             if (((bullets[j].x + bulletWidth/2 - powerUps[i].x)**2 + (bullets[j].y + bulletHeight/2 - powerUps[i].y)**2)**0.5 <= powerUps[i].r){
                 powerUps[i].hit = true;
@@ -722,28 +736,36 @@ document.addEventListener("keyup", (e) => {
 })
 
 document.addEventListener("mousedown", function fireBullets(e){
-    var dX = e.x - (player.x + 15);
-    var dY = e.y - (player.y - 24);
-    var angle = Math.atan(dY / dX);
-    var vX = bulletSpeed*Math.cos(angle);
-    var vY = Math.abs(bulletSpeed*Math.sin(angle));
-    
-    if (checkClick(e.x, e.y, canvas.width*0.92, 0, 70, 70)){
-        gamePaused = !gamePaused;
-        return;
-    }
-    if (angle > 0){
-        vX = -vX;
-    }
-    if (e.y < player.y - 24){
-        if (dX < 0){
-            player.newAngle = - Math.PI/2 + angle;
+    if (e.button == 0){
+        var dX = e.x - (player.x + 15);
+        var dY = e.y - (player.y - 24);
+        var angle = Math.atan(dY / dX);
+        var vX = bulletSpeed*Math.cos(angle);
+        var vY = Math.abs(bulletSpeed*Math.sin(angle));
+        
+        if (checkClick(e.x, e.y, canvas.width*0.92, 0, 70, 70)){
+            gamePaused = !gamePaused;
+            return;
         }
-        else{
-            player.newAngle =  Math.PI/2 + angle;
+        if (angle > 0){
+            vX = -vX;
         }
-        var bullet = new Bullet(vX, vY);
-        bullets.push(bullet);
+        if (e.y < player.y - 24){
+            if (dX < 0){
+                player.newAngle = - Math.PI/2 + angle;
+            }
+            else{
+                player.newAngle =  Math.PI/2 + angle;
+            }
+            var bullet = new Bullet(vX, vY);
+            bullets.push(bullet);
+        }
+    }
+    else{
+        leftKeyPressed = false;
+        rightKeyPressed = false;
+        upKeyPressed = false;
+        downKeyPressed = false;
     }
 });
 
@@ -802,16 +824,16 @@ function animate(){
     drawBossHealth();
     drawScore();
     
+    updateHome(home);
     player.update();
-    updateBullets(bullets);
     updateBots();
     bots.forEach((bot) => {
         bot.update();
     })
-    updateHome(home);
     updateShootingBots(shootingBots);
     updateBossBot(bossBot);
     updatePowerUps(powerUps);
+    updateBullets(bullets);
 
     /*for (var i = 0; i < bullets. length; i++){
         bullets[i].update();
