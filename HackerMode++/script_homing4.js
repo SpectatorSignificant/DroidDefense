@@ -21,8 +21,6 @@ let shootingBots = [];
 let powerUps = [];
 let circles = [];
 let mouse = {x : 0, y : 0};
-//localStorage.setItem("users",JSON.stringify([]));
-//localStorage.removeItem("users");
 let leaderboard = JSON.parse(localStorage.getItem("users")) || [];
 
 let bulletWidth = 10;
@@ -325,9 +323,6 @@ function BossBot(){ //create BOSS object
         c.translate(this.x + 30, this.y + 54);
         c.rotate(-(this.newAngle));
         c.translate(- this.x - 30, - this.y - 54);
-        //this.currentAngle = this.newAngle;
-        //this.newAngle = 0;
-        //c.rotate(-Math.PI/2);
         this.time += 1;
     }
 }
@@ -345,15 +340,11 @@ function PowerUp(){  //create a powerup that clears all shooting bots and fallin
         c.fillStyle = this.color;
         c.arc(this.x, this.y, this.r, 0, 2*Math.PI);
         c.fill();
-        //c.fillRect(this.x, this.y, 10, 10);
         c.fillStyle = "white";
         c.font = "12px Courier New";
         if (this.power == 0){
             c.fillText("clear", this.x - 18, this.y + 2);
         }
-        //else if (this.power == 1){
-        //    c.fillText("freeze", this.x - 10, this.y);
-        //}
     }
 
     this.update = function(){
@@ -371,20 +362,7 @@ function PowerUp(){  //create a powerup that clears all shooting bots and fallin
                 score += 30;
                 hitSound.play();
             }
-            //return [10, 0.5, 0.5];
-            //bulletSpeed = 10;
-            //botSpeed = 0.5;
-            //pinkBotSpeed = 0.5;
-            //this.time += 1;
         }
-
-        //if (this.time >= 5000){
-            //return [8, 2, 4];
-            //bulletSpeed = 8;
-            //botSpeed = 2;
-            //pinkBotSpeed = 4;
-        //}
-        //return
     }
 }
 
@@ -418,19 +396,9 @@ function updateHome(){
                 bullet.y = home.y - 24 - bulletHeight;
                 bullet.spacePressed = true;
                 bullets.push(bullet); //generates a bullet in the direction of the enemy
-                //if (dX < 0){
-                //    home.newAngle = - Math.PI/2 + angle;
-                //}
-                //else{
-                //    home.newAngle =  Math.PI/2 + angle;
-                //}
-                //home.newAngle = Math.atan(dY / dX);
             }
         }
     }
-    //else{
-    //    home.newAngle = 0;
-    //}
     home.draw();
     homeCount += 1;
 }
@@ -448,9 +416,6 @@ function updateBots(){
             var distance = (dX**2+dY**2)**0.5;
             bots[i].velocityX = bots[i].speed*dX/distance; //directs the bot in the direction of the player
             bots[i].velocityY = bots[i].speed*dY/distance;
-            //if (bots[i].missile == true){
-            //    bots[i].newAngle = Math.atan(dX / -dY);
-            //}
             if (bots[i].y >= player.y - bots[i].height){
                 bots[i].velocityX = 0;
                 bots[i].velocityY = 3;
@@ -526,18 +491,10 @@ function updateBossBot(bossBot){
     }
     if (bossBot.time % 100 == 0 && bossBot.dead == false){
         if (bossBotCount % 3 == 0){
-            //var dX = bossBot.x + 30 - player.x - 15;
-            //var dY = bossBot.y + 60 + 24 - player.y;
-            //var distance = (dX**2+dY**2)**0.5;
-            //var angle = Math.atan(dX / dY);
             var bot = new Bot();
             bot.x = bossBot.x + 30 - bulletWidth/2
             bot.y = bossBot.y + 84;
             bot.damage = 2;
-            //bot.newAngle = angle;
-            //bot.velocityX = -pinkBotSpeed*dX/distance;
-            //bot.velocityY = -pinkBotSpeed*dY/distance;
-            //bot.color = "pink";
             bots.push(bot); //make the boss generate bots
             bossBot.newAngle = 0;
         }
@@ -647,21 +604,7 @@ function updateCircles(circles){
             circle.closeToMouse = false;
             circle.velocityX = Math.random() - 0.5; 
             circle.velocityY = Math.random() - 0.5;
-
-            //for (var i = 0; i < circles.length; i++){
-            //    for (var j = i + 1; j < circles.length; j++){
-            //        if (circles[i].x == circles[j].x && circles[i].y == circles[j].y){
-            //            var vX = circles[i].velocityX;
-            //            var vY = circles[i].velocityY;
-            //            circles[i].velocityX = circles[j].velocityX;
-            //            circles[i].velocityY = circles[j].velocityY;
-            //            circles[j].velocityX = vX;
-            //            circles[j].velocityY = vY;
-            //        }
-            //    }
-            //}
         }
-        
         circle.update();
     });
 }
@@ -800,21 +743,9 @@ function animate(){ //repaints the screen
     }
 
     updateCircles(circles);
-
-    //shootingBots[0].draw();
-    //for (var i = 0; i < shootingBots.length; i++){
-    //    shootingBots[i].draw();
-    //}
-
+    
     drawPauseButton();
     if (gamePaused == true){
-        //bots.forEach((bot) => {
-        //    bot.draw();
-        //});
-        //bullets.forEach((bot) => {
-        //    bullet.draw();
-        //})
-        //player.draw();
         drawLeaderboard();
         return;
     }
@@ -834,20 +765,6 @@ function animate(){ //repaints the screen
     updateBossBot(bossBot);
     updatePowerUps(powerUps);
     updateBullets(bullets);
-
-    /*for (var i = 0; i < bullets. length; i++){
-        bullets[i].update();
-
-        for (var j = 0; j < bots.length; j++){
-            if (bullets[i].x >= bots[j].x - 10 && bullets[i].x <= bots[j].x + 16 && bullets[i].y <= bots[j].y + 16 && bullets[i].y >= bots[j].y) {
-                bots.splice(j, 1);
-                bullets.splice(i, 1);
-                hitSound.play();
-                score += 10;
-                break;
-            }
-        }
-    }*/
 }
 
 animate();
